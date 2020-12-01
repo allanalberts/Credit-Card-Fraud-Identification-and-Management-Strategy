@@ -1,4 +1,7 @@
 import pandas as pd
+from sklearn.model_selection import train_test_split
+import itertools
+
 import matplotlib.pyplot as plt
 plt.style.use('ggplot')
 
@@ -53,7 +56,6 @@ def random_state_analysis_plot(ax, data , test_size, goal):
     """
     seed_lst, train_lst, test_lst = random_state_analysis(data, test_size)
     
-    fig, ax = plt.subplots(figsize=(8,4))
     ax.plot(seed_lst, train_lst, 'b-*', label='Fraud Dollar Loss Rate: train data')
     ax.plot(seed_lst, test_lst, 'g-*', label='Fraud Dollar Loss Rate: test data')
     ax.axhline(goal, linestyle='--', label='Fraud Dollar Loss Rate Goal')
@@ -66,12 +68,15 @@ def random_state_analysis_plot(ax, data , test_size, goal):
     ax.set_title(f'Random State Analysis for train-test ratio of {int((1 - test_size) * 100)}-{int(test_size*100)}')
     plt.tight_layout()
 
+
+
 if __name__ == '__main__':
     data = pd.read_csv("../data/creditcard.csv")
 
     goal = .05
     test_size = 0.2
+
     fig, ax = plt.subplots(figsize=(8,4))
     random_state_analysis_plot(ax, data, test_size, goal)
-    fig.savefig("../img/random_state_analysis.png")
+    fig.savefig("../images/random_state_analysis.png")
 
