@@ -11,48 +11,15 @@ from xgboost.sklearn import XGBClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 
+import sys
+sys.path.insert(0, '../src')
+import feature_engineering as ef
+
 SEED = 123
 CPU = -1
 holdoutseed = 4
 FOLDS = 5
 
-def feature_engineering(data):
-    """
-    Returns dataframe and feature list with features that are 
-    relevant only for predicting fraud <= $1 converted
-    to zero (sample mean) for amounts > $1. Likewise, features
-    relevant for only predicting fraud above $1 have their
-    non relevant transactions converted to zero as well.
-
-    Parameters
-    ----------
-    data: dataframe containing transaction dataset
-
-    Returns
-    -------
-    df - Pandas Dataframe
-    feature_lst - list
-    """
-
-    df = data.copy()
-    df['LowAmount'] = (data['Amount'] <= 1)
-    df['LowAmount'] = df['LowAmount'].astype(int)
-    df['NonLowAmount'] = (data['Amount'] > 1)
-    df['NonLowAmount'] = df['NonLowAmount'].astype(int)
-
-    df['V15'] = df['LowAmount'] * data['V15']
-    df['V24'] = df['LowAmount'] * data['V24']
-    df['V26'] = df['LowAmount'] * data['V26']
-
-    df['V8'] = df['NonLowAmount'] * data['V8']
-    df['V19'] = df['NonLowAmount'] * data['V19']
-    df['V21'] = df['NonLowAmount'] * data['V21']
-
-    feature_lst = ['V%d' % number for number in range(1, 13)] + \
-                  ['V%d' % number for number in range(14, 22)] + \
-                  ['V24', 'V26']
-
-    return df, feature_lst
 
 
 def load_data(holdoutseed, engineered_features=False):
@@ -78,7 +45,7 @@ def load_data(holdoutseed, engineered_features=False):
     data = pd.read_csv("../data/creditcard.csv")
 
     if engineered_features:
-        data, features = feature_engineering(data)
+        data, features = ef.feature_engineering(data)
     else:
         features = ['V%d' % number for number in range(1, 29)]
     

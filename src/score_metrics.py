@@ -56,13 +56,13 @@ def cvtrain_classifier(clf, classifiers, X, y):
                                 return_train_score=False, 
                                 scoring=["average_precision", "recall", "precision", "f1"])
 
-    classifiers[clf]["cv_Avg_Pr_scores"] = cv_scores['test_average_precision']
+    classifiers[clf]["cv_Avg_Precision_scores"] = cv_scores['test_average_precision']
     classifiers[clf]["cv_Recall_scores"] = cv_scores['test_recall']
     classifiers[clf]["cv_Precision_scores"] = cv_scores['test_precision']         
     classifiers[clf]["cv_f1_scores"] = cv_scores['test_f1']   
     
     # use average to calculate a singel score:
-    classifiers[clf]["cvAvg_Avg_Pr_score"] = np.mean(classifiers[clf]["cv_Avg_Pr_scores"])
+    classifiers[clf]["cvAvg_Avg_Precision_score"] = np.mean(classifiers[clf]["cv_Avg_Precision_scores"])
     classifiers[clf]["cvAvg_Recall_score"] = np.mean(classifiers[clf]["cv_Recall_scores"])
     classifiers[clf]["cvAvg_Precision_score"] = np.mean(classifiers[clf]["cv_Precision_scores"])
     classifiers[clf]["cvAvg_f1_score"] = np.mean(classifiers[clf]["cv_f1_scores"])
@@ -83,7 +83,7 @@ def test_classifier(clf, classifiers, X_train, y_train, X_test, y_test):
     pipeline = classifiers[clf]['pipeline'].fit(X_train, y_train)    
        
     classifiers[clf]["y_pred"] = pipeline.predict(X_test)
-    classifiers[clf]["test_Avg_Pr_score"] = average_precision_score(y_test, 
+    classifiers[clf]["test_Avg_Precision_score"] = average_precision_score(y_test, 
                                                                classifiers[clf]["y_pred"])
     classifiers[clf]["test_Recall_score"] = recall_score(y_test, 
                                                     classifiers[clf]["y_pred"])
@@ -134,8 +134,10 @@ def plot_cv_metrics(ax, clf_lst, classifiers):
                                                         "cvAvg_Recall_score",
                                                         "cvAvg_Precision_score",
                                                         "cvAvg_f1_score",
-                                                        "cvAvg_Avg_Pr_score",]]   
+                                                        "cvAvg_Avg_Precision_score",]]   
+    results = results.loc[clf_lst]
     results.set_index('clf_desc', inplace=True)
+    
     results.columns = ["Recall", "Precision", "f1", "Avg Precision"] 
     results.T.plot(kind='bar', color=colors, alpha=0.5, rot=0, ax=ax)
     ax.set_title("Average Cross Validation Score")
@@ -153,8 +155,8 @@ def plot_individual_metric(ax, clf_lst, classifiers, metric):
 
     ax.bar(xval, y1, alpha=0.2,zorder=1, label="test score")
     for i in range(FOLDS-1):
-        ax.scatter(xval, [classifiers[clf]["cv_" + metric + "_scores"][i] for clf in classifiers], c="grey", zorder=2)
-    ax.scatter(xval, [classifiers[clf]["cv_" + metric + "_scores"][FOLDS-1] for clf in classifiers], c="grey", zorder=2, label="cv scores")
+        ax.scatter(xval, [classifiers[clf]["cv_" + metric + "_scores"][i] for clf in clf_lst], c="grey", zorder=2)
+    ax.scatter(xval, [classifiers[clf]["cv_" + metric + "_scores"][FOLDS-1] for clf in clf_lst], c="grey", zorder=2, label="cv scores")
     ax.scatter(xval, y2, c="r", zorder=3, label="mean cv score")
     ax.set_xticks(np.arange(len(clf_lst)))
     ax.set_xticklabels(clf_lst)
@@ -183,7 +185,7 @@ def plot_all_metrics(clf_lst, classifiers):
     plot_individual_metric(axs[1], clf_lst, classifiers, "Recall")
     plot_individual_metric(axs[2], clf_lst, classifiers, "Precision")
     plot_individual_metric(axs[3], clf_lst, classifiers, "f1")
-    plot_individual_metric(axs[4], clf_lst, classifiers, "Avg_Pr")
+    plot_individual_metric(axs[4], clf_lst, classifiers, "Avg_Precision")
     return fig
 
 def create_voting_classifier(clf_lst, classifiers, X_fit, y_fit):
