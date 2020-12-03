@@ -2,11 +2,11 @@
 
 ## Table of Contents
 
-1. [About](#about)
-2. [The Challenge](#challenge)
+1. [Fraud Managent](#fraud-management-background)
+2. [Business Requirements](#business-requirments)
 3. [Data Source](#about-the-data)
 5. [Training and Evaluation Strategy](#training-and-evaluation-strategy)
-6. [Classifier Tuning](#classifier-tuning)
+6. [Classifier Tuning](#classifier-tuning-using-cross-validation)
 7. [SMOTE](#smote)
 8. [Feature Engineering](feature-engineering)
 9. [Production Results](production-results)
@@ -39,9 +39,10 @@ The datasets is provided by Kaggle and contains credit card transactions made ov
 ## Training and Evaluation Strategy
 In a real world scenario we would train on historical data and test on new transactions, however with only 48 hours of data we will hold out 20% of the data to represent new data for measuring our system when it is put into production. We will ensure that this data is equilent to our training data by taking a stratified, shuffled sample and the usage of a random state of 4 on our train_test_split will provide for an equal balance of fraud incident rate (0.00172) as well as actual fraud loss amount rate (0.00238 vs 0.00243). Having the a similar proportion of fraud transactions and net amount enabling equivelent measures of fraud per sales basis point (our requirements).
 ![](/images/random_state_analysis.png)
-The training data will then be split again so that 80% can be used for cross validation tuning and 20% for testing for overfitting prior to releasing the model for production.
 
-## Example Dependent Cost Matrix
+## Classifier Tuning using cross validation
+The training data will then be split again so that 80% can be used for cross validation tuning and 20% for testing for overfitting prior to releasing the model for production. **Stratification** will be used with both cross_val_predict and cross_val_score. This is important because our data is highly imbalanced and without stratification there will be folds with varying proportions of fraud that will lead to very different prediction scores between the folds that won't generalize to future transactional data. **Shuffling** is also importing to use since similar fraud transactions will sometimes occur heavier in a small timeframe and our data is ordered by time.
+
 
 ## Classifier Selection
 Multiple forms of ensemble learning will be used in the fraud detection model. 
@@ -52,8 +53,12 @@ Multiple forms of ensemble learning will be used in the fraud detection model.
 
 **Voting Based Ensemble Learning** is fairly straight forward as it just aggregates predictions from multiple models to smooth...???????. Individual submodels can be weighted so as to increase or decrease their impact on the final result. We will using the VotingClassifier to combine with equal weighting the RandomForest and XGBoost tree based classifiers with a linear classifier that has used a completely different predictive methodology (LogisticRegression). 
 
-## Classifier Tuning using cross validation
-**Stratification** will be used with both cross_val_predict and cross_val_score. This is important because our data is highly imbalanced and without stratification there will be folds with varying proportions of fraud that will lead to very different prediction scores between the folds that won't generalize to future transactional data. **Shuffling** is also importing to use since similar fraud transactions will sometimes occur heavier in a small timeframe and our data is ordered by time.
+## Classifier Evalution:
+For a benchmark, our three classifiers have been cv trained and tested using their default paramters:
+![](/images/metric scores.png)
+
+
+## Example Dependent Cost Matrix
 
  - LogisticRegression Classifier
  - RandomForest Classifier

@@ -16,7 +16,6 @@ from sklearn.ensemble import VotingClassifier
 
 from sklearn.metrics import recall_score
 from sklearn.metrics import precision_score
-from sklearn.metrics import average_precision_score 
 from sklearn.metrics import f1_score
 
 import sys
@@ -54,15 +53,13 @@ def cvtrain_classifier(clf, classifiers, X, y):
     cv_scores = cross_validate(classifiers[clf]['pipeline'], X, y,
                                 cv=StratifiedKFold(n_splits=FOLDS, shuffle=True, random_state=SEED), 
                                 return_train_score=False, 
-                                scoring=["average_precision", "recall", "precision", "f1"])
+                                scoring=["recall", "precision", "f1"])
 
-    classifiers[clf]["cv_Avg_Precision_scores"] = cv_scores['test_average_precision']
     classifiers[clf]["cv_Recall_scores"] = cv_scores['test_recall']
     classifiers[clf]["cv_Precision_scores"] = cv_scores['test_precision']         
     classifiers[clf]["cv_f1_scores"] = cv_scores['test_f1']   
     
     # use average to calculate a singel score:
-    classifiers[clf]["cvAvg_Avg_Precision_score"] = np.mean(classifiers[clf]["cv_Avg_Precision_scores"])
     classifiers[clf]["cvAvg_Recall_score"] = np.mean(classifiers[clf]["cv_Recall_scores"])
     classifiers[clf]["cvAvg_Precision_score"] = np.mean(classifiers[clf]["cv_Precision_scores"])
     classifiers[clf]["cvAvg_f1_score"] = np.mean(classifiers[clf]["cv_f1_scores"])
@@ -83,8 +80,6 @@ def test_classifier(clf, classifiers, X_train, y_train, X_test, y_test):
     pipeline = classifiers[clf]['pipeline'].fit(X_train, y_train)    
        
     classifiers[clf]["y_pred"] = pipeline.predict(X_test)
-    classifiers[clf]["test_Avg_Precision_score"] = average_precision_score(y_test, 
-                                                               classifiers[clf]["y_pred"])
     classifiers[clf]["test_Recall_score"] = recall_score(y_test, 
                                                     classifiers[clf]["y_pred"])
     classifiers[clf]["test_Precision_score"] = precision_score(y_test, 
@@ -116,7 +111,7 @@ def score_classifiers(clf_lst, classifiers, X_train, y_train, X_test, y_test, Ti
 def plot_cv_metrics(ax, clf_lst, classifiers):
     """
     Plots the average cross validation score for each classifer for the metrics
-    recall, precision, f1, average precision
+    recall, precision, f1
 
     Parameters
     ----------
@@ -133,12 +128,11 @@ def plot_cv_metrics(ax, clf_lst, classifiers):
                                          orient='index')[["clf_desc", 
                                                         "cvAvg_Recall_score",
                                                         "cvAvg_Precision_score",
-                                                        "cvAvg_f1_score",
-                                                        "cvAvg_Avg_Precision_score",]]   
+                                                        "cvAvg_f1_score"]]   
     results = results.loc[clf_lst]
     results.set_index('clf_desc', inplace=True)
     
-    results.columns = ["Recall", "Precision", "f1", "Avg Precision"] 
+    results.columns = ["Recall", "Precision", "f1"] 
     results.T.plot(kind='bar', color=colors, alpha=0.5, rot=0, ax=ax)
     ax.set_title("Average Cross Validation Score")
     ax.set_ylim(ymin=0, ymax=1.0);
@@ -180,12 +174,11 @@ def plot_all_metrics(clf_lst, classifiers):
     -------
     fig: pyplot figure
     """
-    fig, axs = plt.subplots(1, 5, figsize=(20, 6))
+    fig, axs = plt.subplots(1, 4, figsize=(20, 6))
     plot_cv_metrics(axs[0], clf_lst, classifiers)
     plot_individual_metric(axs[1], clf_lst, classifiers, "Recall")
     plot_individual_metric(axs[2], clf_lst, classifiers, "Precision")
     plot_individual_metric(axs[3], clf_lst, classifiers, "f1")
-    plot_individual_metric(axs[4], clf_lst, classifiers, "Avg_Precision")
     return fig
 
 def create_voting_classifier(clf_lst, classifiers, X_fit, y_fit):
@@ -222,11 +215,20 @@ def create_voting_classifier(clf_lst, classifiers, X_fit, y_fit):
         classifiers["Voting"]['pipeline'].fit(X_fit, y_fit) 
         t = time.time() - start_time
         print(f"{t:.0f} seconds cross_validate execution time for Voting classifier")
-    return classifers
+    return classifiers
 
 if __name__ == '__main__':
+    # X_train, X_test, \
+    # y_train, y_test, \
+    # c_train, c_test, \
+    # X_holdout, y_holdout, c_holdout, \
+    # features = h.load_data(4, engineered_features=False)
+    # classifiers = h.initialize_classifier_dict()
+    # clf_lst = [clf for clf in classifiers]
 
-   classifiers = h.load_classifier_dict("classifiers_bak.pickle")
-   clf_lst = [clf for clf in classifiers]
-   fig = plot_all_metrics(clf_lst, classifiers)
-   fig.savefig("../images/metric_scores.png")
+    # score_classifiers(clf_lst, classifiers, X_train, y_train, X_test, y_test, TimeIt=True)
+    # h.save_classifier_dict(classifiers, "10")
+    classifiers = h.load_classifier_dict('classifiers_ver10.pickle')
+    clf_lst = [clf for clf in classifiers]
+    fig = plot_all_metrics(clf_lst, classifiers)
+    fig.savefig("../images/metric_scores.png")
