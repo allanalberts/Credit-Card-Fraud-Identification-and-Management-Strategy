@@ -55,7 +55,7 @@ Multiple forms of ensemble learning will be used in the fraud detection model.
 
 ## Classifier Evalution:
 For a benchmark, our three classifiers have been cv trained and tested using their default paramters:
-![](/images/metric scores.png)
+![](/images/metric_scores.png)
 
 
 ## Example Dependent Cost Matrix
