@@ -67,6 +67,9 @@ def plot_cumm_pca(ax, X_sampled, components):
     ax.set_xlabel('Components')
     ax.set_ylabel('Variance Explained')
 
+
+    
+
 if __name__ == '__main__':
 
     data = pd.read_csv("../data/creditcard.csv")

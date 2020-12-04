@@ -216,6 +216,8 @@ def plot_multiple_confusion_matrix(clf_lst, classifiers, CostSensitive):
             plot_confusion_matrix(axs[i], classifiers[clf]["cnf_matrix"], clf, cmap=classifiers[clf]["cmap"], currency=False)
         i += 1
     plt.tight_layout()
+    
+    return fig
 
 def plot_total_cost(ax, clf_lst, classifiers, c, y):
     '''

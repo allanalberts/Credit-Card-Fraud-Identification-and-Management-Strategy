@@ -30,6 +30,12 @@ Create a business strategy for a cost efficient fraud management model that incl
 ## Business Rules
 
 The fraud prediction model will output a queue of suspected fraud transactions that will then be manually reviewed/investigated to confirm the legitimacy of the suspected fraud. The average operational cost per transaction review **ReviewCost** is determined by the business to be 10 dollars. The business model will assume that, through the manual review process, the legitimacy of the suspected fraud transaction can be determined and these transactions will be cancelled. Undetected fraud transactions will result in a chargeback for the amount of the transaction plus a chargeback processing fee **ChargebackFee** assessed by the financial institution in the amount of 20 dollars per transaction. Legitimate transactions that are misidentified as fraud and cancelled will be assigned a cost equivelent to their lost revenue. 
+- Fraud Budget: 5bp (0.05% of sales)
+- Chargeback Fee: 20.00
+- Avg Manual Review Cost: 10.00
+- Will automatically decline suspected fraud when transaction amount < review costs
+![](/images/cost_matrix2.png)
+
 
 ## About the Data 
 
@@ -47,16 +53,15 @@ The training data will then be split again so that 80% can be used for cross val
 ## Classifier Selection
 Multiple forms of ensemble learning will be used in the fraud detection model. 
 
-**Bagging Based Ensemble Learning** uses multiple random models with their individual projections combined to to produce a final output. Bagging generally improves stability and accuracy. A Random Forrest Classifier will be used that uses multiple decision trees built on randomly selected data. Decision trees often perform well on imbalanced datasets because the splitting rules that look at the class variable used in the creation of the trees can force both classes to be addressed. 
+**Bagging Based Ensemble Learning** uses multiple random models with their individual projections combined to to produce a final output. Bagging generally improves stability and accuracy. A **Random Forrest Classifier** will be used that uses multiple decision trees built on randomly selected data. Decision trees often perform well on imbalanced datasets because the splitting rules that look at the class variable used in the creation of the trees can force both classes to be addressed. 
 
-**Boosting Based Ensemble Learning** is a sequential learning ensemble technique. Weak learners are combined to make a stong learner. The entire dataset is used to train the model and then subsequent models are built by fitting the residual error values of the initial model. Boosting attempts to give a higher weight to those observations that were poorly estimated in the previous model. Once the sequence of models is created, their preditions are weighted by their accuracy scores and the results are combined to create a final estimation. Extreme Gradient Boosting (XGBoost) performs boosting using decision trees.
-
-**Voting Based Ensemble Learning** is fairly straight forward as it just aggregates predictions from multiple models to smooth...???????. Individual submodels can be weighted so as to increase or decrease their impact on the final result. We will using the VotingClassifier to combine with equal weighting the RandomForest and XGBoost tree based classifiers with a linear classifier that has used a completely different predictive methodology (LogisticRegression). 
+**Boosting Based Ensemble Learning** is a sequential learning ensemble technique. Weak learners are combined to make a stong learner. The entire dataset is used to train the model and then subsequent models are built by fitting the residual error values of the initial model. Boosting attempts to give a higher weight to those observations that were poorly estimated in the previous model. Once the sequence of models is created, their preditions are weighted by their accuracy scores and the results are combined to create a final estimation. **Extreme Gradient Boosting (XGBoost)** performs boosting using decision trees.
 
 ## Classifier Evalution:
 For a benchmark, our three classifiers have been cv trained and tested using their default paramters. Also shown are the test scores for each metric along with the values from each cross validation fold. Note that none of the classifiers appear to overfit the data with cross val training scores being in line with the test data score.
 ![](/images/metric_scores.png)
 
+## Dealing Imbalanced Data:
 ## Synthetic Minority Oversampling Technique (SMOTE)
 Having more data points to train on usually increases the performance of classifiers. Because our dataset is so highly embalanced with very few fraud records, We will use Synthetic Minority Oversampling Technique (SMOTE) to create new minority class records by taking a random near minority set neighbor of each minority record. A vector is then calculted that runs through the current record and it's selected neighbor. This vector is multiplied by a random number between zero and one and added to the current data point to create the new synthetic datapoint. 
 
@@ -68,21 +73,27 @@ Below are the results of a cross validation test using various ratios of synthet
 If not executed correctly, SMOTE may not retain the integrity of the class distribution of the original dataset. The process must be performed during, and **not** before the cross validatioin process as shown below:
 
 ![](/images/smote-cross1.png)
-![](/images/smote-cross1.png)
+![](/images/smote-cross2.png)
 
 This means that a grid search for identifying optimum classifier parameters when using SMOTE must regenerate the systhetic records during each fold. The additional level of computation, makes hyperparameter tuning computationaly cost prohibitive when using SMOTE data. We will therefore only have the option of using non-SMOTE hyperparameter tuned classifiers or those tuned without synthesized data.
+![](/images/SMOTE_score_comparison.png)
+
+**Voting Based Ensemble Learning** is fairly straight forward as it just aggregates predictions from multiple models to smooth...???????. Individual submodels can be weighted so as to increase or decrease their impact on the final result. We will using the VotingClassifier to combine with equal weighting the RandomForest and XGBoost tree based classifiers with a linear classifier that has used a completely different predictive methodology (LogisticRegression). 
 
 ## Ensemble Classifier Bagging
 
-## train on full test set before applying to production
 ## Example Dependent Cost Matrix
+![](/images/test_confusion_matrix.png)
+![](/images/test_confusion_matrix_cost.png)
 
- - LogisticRegression Classifier
- - RandomForest Classifier
- - XGBoost Classifier
+## Anticpated Performance vs. Actual Performance
+
+![](/images/prod_confusion_matrix.png)
+![](/images/prod_confusion_matrix_cost.png)
 
 
 ## PCA Visualization of holdout set
+![](/images/PCA_visualization.png)
 
 ## PR curve 
 
