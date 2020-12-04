@@ -122,9 +122,10 @@ def initialize_classifier_dict():
                     "threshold": 0.5}
             }
     
-    # Make classifier pipelines:
     for clf in classifiers:
-        steps = [# placeholder for smote: ('Preprocess', FeaturePreprocess), 
+        steps = [#('scaler', StandardScaler()),
+                 #('SMOTE', SMOTE(random_state=SEED, n_jobs=CPU,
+                 #               sampling_strategy=classifiers[clf]['SMOTE_bestparm'])),
                  ('Classifier', classifiers[clf]['model'])]
         classifiers[clf]['pipeline'] = Pipeline(steps)    
     

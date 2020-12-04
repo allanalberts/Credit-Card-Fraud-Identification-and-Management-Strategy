@@ -54,10 +54,27 @@ Multiple forms of ensemble learning will be used in the fraud detection model.
 **Voting Based Ensemble Learning** is fairly straight forward as it just aggregates predictions from multiple models to smooth...???????. Individual submodels can be weighted so as to increase or decrease their impact on the final result. We will using the VotingClassifier to combine with equal weighting the RandomForest and XGBoost tree based classifiers with a linear classifier that has used a completely different predictive methodology (LogisticRegression). 
 
 ## Classifier Evalution:
-For a benchmark, our three classifiers have been cv trained and tested using their default paramters:
+For a benchmark, our three classifiers have been cv trained and tested using their default paramters. Also shown are the test scores for each metric along with the values from each cross validation fold. Note that none of the classifiers appear to overfit the data with cross val training scores being in line with the test data score.
 ![](/images/metric_scores.png)
 
+## Synthetic Minority Oversampling Technique (SMOTE)
+Having more data points to train on usually increases the performance of classifiers. Because our dataset is so highly embalanced with very few fraud records, We will use Synthetic Minority Oversampling Technique (SMOTE) to create new minority class records by taking a random near minority set neighbor of each minority record. A vector is then calculted that runs through the current record and it's selected neighbor. This vector is multiplied by a random number between zero and one and added to the current data point to create the new synthetic datapoint. 
 
+Below are the results of a cross validation test using various ratios of synthetically created fraud. You can see that all classifiers benefited from the additional records with their optimum ratio for improving recall scoring is noted on each plot. 
+
+![](/images/smote_parms.png)
+
+### SMOTE issues
+If not executed correctly, SMOTE may not retain the integrity of the class distribution of the original dataset. The process must be performed during, and **not** before the cross validatioin process as shown below:
+
+![](/images/smote-cross1.png)
+![](/images/smote-cross1.png)
+
+This means that a grid search for identifying optimum classifier parameters when using SMOTE must regenerate the systhetic records during each fold. The additional level of computation, makes hyperparameter tuning computationaly cost prohibitive when using SMOTE data. We will therefore only have the option of using non-SMOTE hyperparameter tuned classifiers or those tuned without synthesized data.
+
+## Ensemble Classifier Bagging
+
+## train on full test set before applying to production
 ## Example Dependent Cost Matrix
 
  - LogisticRegression Classifier
@@ -65,10 +82,10 @@ For a benchmark, our three classifiers have been cv trained and tested using the
  - XGBoost Classifier
 
 
-## Adding SMOTE
- - SMOTE
- - Pystat??
+## PCA Visualization of holdout set
 
-## Ensemble Classifier Bagging
+## PR curve 
+
+## Thresholding??
 
 

@@ -109,6 +109,7 @@ def update_pipeline(clf_lst, classifiers):
                                 sampling_strategy=classifiers[clf]['SMOTE_bestparm'])),
                  ('Classifier', classifiers[clf]['model'])]        
         classifiers[clf]['pipeline'] = imb_Pipeline(steps) 
+    return classifiers
 
 
 if __name__ == '__main__':

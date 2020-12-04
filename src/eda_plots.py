@@ -54,13 +54,13 @@ def pca_reduction(X_sampled):
                    random_state=2).fit_transform(X_sampled)
     return X_tsne, X_umap
 
-def plot_cumm_pca(ax, X_sampled):
-    pca = decomposition.PCA(n_components=component_num)
+def plot_cumm_pca(ax, X_sampled, components):
+
+    pca = decomposition.PCA(n_components=components)
     pca.fit_transform(X_sampled)
 
     x = range(0, X_sampled.shape[1])
     y = np.cumsum(pca.explained_variance_ratio_)
-
     
     ax.scatter(x, y)
     ax.set_title("PCA Components vs. Cummulative Explained Variance")
@@ -75,7 +75,7 @@ if __name__ == '__main__':
     X_sampled, y_sampled = pca_sample_data(data, features)
 
     fig, ax = plt.subplots()
-    plot_cumm_pca(ax, X_sampled)
+    plot_cumm_pca(ax, X_sampled, 29)
     print(f'Cummulative Total Explained Variance of first \
             10 components: \
             {np.sum(pca.explained_variance_ratio_[0:10]):.2f}')
@@ -83,4 +83,5 @@ if __name__ == '__main__':
     fig, axs = plt.subplots(1, 2, figsize=(14,6))
     embedding_plot(axs[0], X_tsne, y_sampled, \
         "t-SNE 2D plot of Fraud vs. Non Fraud using PCA dimensionality reduction")
-    embedding_plot(axs[1], X_umap, y_sampled,"umap")
+    fig.savefig("../images/pca_visualization.png")
+#    embedding_plot(axs[1], X_umap, y_sampled,"umap")

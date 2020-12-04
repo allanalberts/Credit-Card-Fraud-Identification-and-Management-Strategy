@@ -1,3 +1,16 @@
+"""
+FUNCTIONS IN LIBRARY:
+--------------------
+cs_confution_matrix()
+full_review()
+partial_review()
+no_review()
+class_probabilities()
+plot_confusion_matrix()
+plot_multiple_confusion_matrix()
+plot_total_cost()
+"""
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -28,18 +41,6 @@ FraudBudget=0.0005
 ReviewCost=10
 ChargebackFee=20
 
-"""
-FUNCTIONS IN LIBRARY:
---------------------
-cs_confution_matrix()
-full_review()
-partial_review()
-no_review()
-class_probabilities()
-plot_confusion_matrix()
-plot_multiple_confusion_matrix()
-plot_total_cost()
-"""
 
 def cs_confusion_matrix(y_test, y_pred, cost_matrix):
     """
@@ -227,8 +228,12 @@ def plot_total_cost(ax, clf_lst, classifiers, c, y):
         colors.append(classifiers[clf]["c"])
         clf_desc.append(classifiers[clf]["clf_desc"])
     results = pd.DataFrame.from_dict(classifiers, orient='index')[["clf_desc","TotalCosts"]]
+    results = results.loc[clf_lst]
     results.set_index('clf_desc', inplace=True)
     results.T.plot(kind='bar', ax=ax, color=colors, alpha=0.5, rot=0) 
     ax.axhline(y=h.total_legit(c,y)*FraudBudget, color='black', linestyle='dashed')
     ax.set_title("Costs vs. Budget (dashed line)")
     ax.legend(loc='lower right') 
+
+    if __name__ == '__main__':
+        cost_matrix = partial_review(c_test, ReviewCost, ChargebackFee)

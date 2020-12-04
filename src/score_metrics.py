@@ -1,3 +1,13 @@
+"""
+FUNCTIONS IN LIBRARY:
+--------------------
+    cvtrain_classifiers()
+    fit_classifiers()
+    score_classifiers()
+    plot_cv_metrics()
+    plot_individual_metric()
+    plot_all_metrics() 
+"""
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -26,18 +36,8 @@ SEED = 123
 FOLDS = 5
 CPU = -1
 
-"""
-FUNCTIONS IN LIBRARY:
---------------------
-cvtrain_classifier()
-test_classifer()
-score_classifers()
-plot_cv_metrics()
-plot_individual_metric()
-plot_all_metrics()
-"""
 
-def cvtrain_classifier(clf, classifiers, X, y):
+def cvtrain_classifiers(clf_lst, classifiers, X, y, TimeIt=True):
     """
     Runs cross validation on the pipeline stored in the classifiers dictionary under subkey['pipeline']
     using X and y data. Results are store in the classifiers dictionary. 
@@ -45,70 +45,85 @@ def cvtrain_classifier(clf, classifiers, X, y):
 
     Parameters
     ----------
-    clf: string
-    X: pandas dataframe
-    y: pandas series
+    clf_lst: list of classifier keys
+    X: matrix to fit on
+    y: array to fit on
     """    
+    for clf in clf_lst:
+        start_time = time.time()
+        cv_scores = cross_validate(classifiers[clf]['pipeline'], X, y,
+                                    cv=StratifiedKFold(n_splits=FOLDS, shuffle=True, random_state=SEED), 
+                                    return_train_score=False, 
+                                    scoring=["recall", "precision", "f1"])
 
-    cv_scores = cross_validate(classifiers[clf]['pipeline'], X, y,
-                                cv=StratifiedKFold(n_splits=FOLDS, shuffle=True, random_state=SEED), 
-                                return_train_score=False, 
-                                scoring=["recall", "precision", "f1"])
-
-    classifiers[clf]["cv_Recall_scores"] = cv_scores['test_recall']
-    classifiers[clf]["cv_Precision_scores"] = cv_scores['test_precision']         
-    classifiers[clf]["cv_f1_scores"] = cv_scores['test_f1']   
+        classifiers[clf]["cv_Recall_scores"] = cv_scores['test_recall']
+        classifiers[clf]["cv_Precision_scores"] = cv_scores['test_precision']         
+        classifiers[clf]["cv_f1_scores"] = cv_scores['test_f1']   
     
-    # use average to calculate a singel score:
-    classifiers[clf]["cvAvg_Recall_score"] = np.mean(classifiers[clf]["cv_Recall_scores"])
-    classifiers[clf]["cvAvg_Precision_score"] = np.mean(classifiers[clf]["cv_Precision_scores"])
-    classifiers[clf]["cvAvg_f1_score"] = np.mean(classifiers[clf]["cv_f1_scores"])
+        # use average to calculate a singel score:
+        classifiers[clf]["cvAvg_Recall_score"] = np.mean(classifiers[clf]["cv_Recall_scores"])
+        classifiers[clf]["cvAvg_Precision_score"] = np.mean(classifiers[clf]["cv_Precision_scores"])
+        classifiers[clf]["cvAvg_f1_score"] = np.mean(classifiers[clf]["cv_f1_scores"])
+        if TimeIt:
+            t = time.time() - start_time
+            print(f"{t:.0f} seconds cvfit execution time for {clf} classifier")
 
     return classifiers
 
-def test_classifier(clf, classifiers, X_train, y_train, X_test, y_test):
-    '''
-    Fits the pipeline stored in classifiers dictionary on X_train, y_train data.
-    Makes predictions with pipiline on X_test, y_test data.  
-    Results are store in the classifiers dictionary.
- 
-    Parameters
-    ----------
-    clf: string
-    '''     
-
-    pipeline = classifiers[clf]['pipeline'].fit(X_train, y_train)    
-       
-    classifiers[clf]["y_pred"] = pipeline.predict(X_test)
-    classifiers[clf]["test_Recall_score"] = recall_score(y_test, 
-                                                    classifiers[clf]["y_pred"])
-    classifiers[clf]["test_Precision_score"] = precision_score(y_test, 
-                                                          classifiers[clf]["y_pred"])
-    classifiers[clf]["test_f1_score"] = f1_score(y_test, 
-                                            classifiers[clf]["y_pred"])    
-    return classifiers
-                                            
-def score_classifiers(clf_lst, classifiers, X_train, y_train, X_test, y_test, TimeIt=True):
+def fit_classifiers(clf_lst, classifiers, X, y, SMOTE=False, TimeIt=True):
     """
-    Populates classifier dictionary keys with cv and test predictions
- 
+    Return classifier dictionary with element 'fitted_model' containing the 
+    classifer fitted to X, y
+
     Parameters
     ----------
-    clfassifiers: dictionary 
-    X_train:
-    y_train:
+    clf: string, the classifer
+    classifiers: dictionary holding each classifiers attributes
+    X: matrix to fit on
+    y: array to fit on
+
+    Returns
+    -------
+    classifiers: dictionary
     """
     for clf in clf_lst:
         start_time = time.time()
-
-        classifiers = cvtrain_classifier(clf, classifiers, X_train, y_train) 
-        classifiers = test_classifier(clf, classifiers, X_train, y_train, X_test, y_test)
-        
+        if SMOTE:
+            classifiers[clf]['fitted_model'] = classifiers[clf]['pipeline'].fit(X, y)      
+        else: 
+            classifiers[clf]['fitted_model'] = classifiers[clf]['model'].fit(X, y) 
         if TimeIt:
             t = time.time() - start_time
-            print(f"{t:.0f} seconds cross_validate execution time for {clf} classifier")
+            print(f"{t:.0f} seconds fit execution time for {clf} classifier")
+    return classifiers
 
-def plot_cv_metrics(ax, clf_lst, classifiers):
+def score_classifiers(clf_lst, classifiers, X, y):
+    """
+    Makes predictions with pipiline on X, y data. Usually test or 
+    holdout data. Results are store in the classifiers dictionary.
+ 
+     Parameters
+    ----------
+    clf_lst: list of classifier keys
+    classifiers: dictionary holding each classifiers attributes
+    X: matrix to fit on
+    y: array to fit on
+
+    Returns
+    -------
+    classifiers: dictionary
+    """
+    for clf in clf_lst:
+        classifiers[clf]["y_pred"] = classifiers[clf]["fitted_model"].predict(X)
+        classifiers[clf]["test_Recall_score"] = recall_score(y, 
+                                                    classifiers[clf]["y_pred"])
+        classifiers[clf]["test_Precision_score"] = precision_score(y, 
+                                                          classifiers[clf]["y_pred"])
+        classifiers[clf]["test_f1_score"] = f1_score(y, 
+                                            classifiers[clf]["y_pred"])    
+    return classifiers
+                                            
+def plot_clf_metrics(ax, clf_lst, classifiers, score_type):
     """
     Plots the average cross validation score for each classifer for the metrics
     recall, precision, f1
@@ -119,22 +134,37 @@ def plot_cv_metrics(ax, clf_lst, classifiers):
     clf_lst: list
     classifiers: dictionary
     """
+    recall = "Recall_score"
+    precision = "Precision_score"
+    f1 = "f1_score"
+    title = ""
+    if score_type == "CV":
+        recall = "cvAvg_" + recall
+        precision = "cvAvg_" + precision
+        f1 = "cvAvg_" + f1
+        title = "Average SMOTE Upsampled Score"
+    if score_type == "test":
+        recall = "test_" + recall
+        precision = "test_" + precision
+        f1 = "test_" + f1
+        title = "Average Cross Validation Score"
+
     colors = []
     clf_desc = []
     for clf in clf_lst:
         colors.append(classifiers[clf]["c"])
         clf_desc.append(classifiers[clf]["clf_desc"])
-        results = pd.DataFrame.from_dict(classifiers, 
-                                         orient='index')[["clf_desc", 
-                                                        "cvAvg_Recall_score",
-                                                        "cvAvg_Precision_score",
-                                                        "cvAvg_f1_score"]]   
+    results = pd.DataFrame.from_dict(classifiers, 
+                                    orient='index')[["clf_desc", 
+                                                    recall,
+                                                    precision,
+                                                    f1]]   
     results = results.loc[clf_lst]
     results.set_index('clf_desc', inplace=True)
     
     results.columns = ["Recall", "Precision", "f1"] 
     results.T.plot(kind='bar', color=colors, alpha=0.5, rot=0, ax=ax)
-    ax.set_title("Average Cross Validation Score")
+    ax.set_title(title)
     ax.set_ylim(ymin=0, ymax=1.0);
     ax.grid('on', axis='y')
     ax.legend(loc='lower center')
@@ -175,7 +205,7 @@ def plot_all_metrics(clf_lst, classifiers):
     fig: pyplot figure
     """
     fig, axs = plt.subplots(1, 4, figsize=(20, 6))
-    plot_cv_metrics(axs[0], clf_lst, classifiers)
+    plot_clf_metrics(axs[0], clf_lst, classifiers, score_type="CV")
     plot_individual_metric(axs[1], clf_lst, classifiers, "Recall")
     plot_individual_metric(axs[2], clf_lst, classifiers, "Precision")
     plot_individual_metric(axs[3], clf_lst, classifiers, "f1")
