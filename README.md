@@ -62,11 +62,16 @@ Multiple forms of ensemble learning will be used in the fraud detection model.
 For a benchmark, our three classifiers have been cv trained and tested using their default paramters. Also shown are the test scores for each metric along with the values from each cross validation fold. Note that none of the classifiers appear to overfit the data with cross val training scores being in line with the test data score.
 ![](/images/metric_scores.png)
 
-## Dealing Imbalanced Data:
-### Synthetic Minority Oversampling Technique (SMOTE)
-Having more data points to train on usually increases the performance of classifiers. Because our dataset is so highly embalanced with very few fraud records, We will use Synthetic Minority Oversampling Technique (SMOTE) to create new minority class records by taking a random near minority set neighbor of each minority record. A vector is then calculted that runs through the current record and it's selected neighbor. This vector is multiplied by a random number between zero and one and added to the current data point to create the new synthetic datapoint. 
+## Dealing Unbalanced Data:
+Unbalanced data means that there are fewer records that you are training to predict than the ones you are not trying to predict. This causes issue for generalizing classifiers to unseen data because there aren't enough records in the minority class to effectivley learn the decision boundaries between the minority and majority records. There are two ways you can try to better balance your dataset.
 
-![](/images/OTE_viz.png)
+### Undersampling
+Undersampling is a technique where records from the majority class are removed in order to make the two classes more equal. Our data is far too imbalanced to use this approach without a large information loss.
+
+### Synthetic Minority Oversampling Technique (SMOTE)
+ Because our dataset is so highly embalanced with very few fraud records, We will use Synthetic Minority Oversampling Technique (SMOTE) to create new minority class records by taking a random near minority set neighbor of each minority record. A vector is then calculted that runs through the current record and it's selected neighbor. This vector is multiplied by a random number between zero and one and added to the current data point to create the new synthetic datapoint. 
+![](/images/SMOTE_viz.png)
+
 Below are the results of a cross validation test using various ratios of synthetically created fraud. You can see that all classifiers benefited from the additional records with their optimum ratio for improving recall scoring is noted on each plot. 
 
 ![](/images/smote_parms.png)
@@ -82,13 +87,13 @@ This means that a grid search for identifying optimum classifier parameters when
 ![](/images/SMOTE_score_comparison.png)
 
 ### Classifier Bagging
-**Voting Based Ensemble ** is fairly straight forward and it's soft setting it takes the argmax of the sums of the predicted probabilitiesas from multiple models. Individual submodels can be weighted so as to increase or decrease their impact on the final result. We will using the VotingClassifier to combine with equal weighting our strong learner classifiers that each approached the problem with a different methodology. 
+**Voting Based Ensemble** is fairly straight forward and it's soft setting it takes the argmax of the sums of the predicted probabilitiesas from multiple models. Individual submodels can be weighted so as to increase or decrease their impact on the final result. We will using the VotingClassifier to combine with equal weighting our strong learner classifiers that each approached the problem with a different methodology. 
 
 ### Example Dependent Cost Matrix
 ![](/images/test_confusion_matrix.png)
 ![](/images/test_confusion_matrix_cost.png)
 
-### Anticpated Performance vs. Actual Performance
+### Anticipated Performance vs. Actual Performance
 ![](/images/test_total_cost.png)
 ![](/images/prod_total_cost.png)
 
