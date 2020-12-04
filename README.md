@@ -71,6 +71,7 @@ Undersampling is a technique where records from the majority class are removed i
 
 ### Synthetic Minority Oversampling Technique (SMOTE)
  Because our dataset is so highly embalanced with very few fraud records, We will use Synthetic Minority Oversampling Technique (SMOTE) to create new minority class records by taking a random near minority set neighbor of each minority record. A vector is then calculted that runs through the current record and it's selected neighbor. This vector is multiplied by a random number between zero and one and added to the current data point to create the new synthetic datapoint. 
+ 
 ![](/images/SMOTE_viz.png)
 
 Below are the results of a cross validation test using various ratios of synthetically created fraud. You can see that all classifiers benefited from the additional records with their optimum ratio for improving recall scoring is noted on each plot. 
