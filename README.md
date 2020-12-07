@@ -34,8 +34,10 @@ The fraud prediction model will output a queue of suspected fraud transactions t
 - Chargeback Fee: 20.00
 - Avg Manual Review Cost: 10.00
 - Will automatically decline suspected fraud when transaction amount < review costs
+These costs are then written to a cost matrix that has the same number of rows as our dataset. The cost matrix is then applied to the predicted results using the following logic:
+
+
 ![](/images/cost_matrix2.png)
-These potential costs are then written to a cost matrix that has the same number of rows as our dataset. The cost matrix is then applied to the predicted results using the following logic:
 
 ![](/images/cost_matrix_formulas.png)
 
