@@ -20,7 +20,7 @@ Successful fraud identification models involve limiting misclassifications:
 - False negatives or not identfying fraud. This is measured by a recall score representing the percentage of fraud captured by the model. 
 - False positive or incorreclty identifying legitimate transactions as fraudulent. This is measured with precision score representing the percentage of the manual review queue that is actually fraud as opposed to a misclassified legitimate sale. 
 
-However, measuring the effectiveness of a fraud identification model is more complex than these classification metrics as all transactions share the same misclassification costs. It is imperative that Recall of a fraud model captures high dollar fraud. However, the importance of Precision should not be underestimated, as legitimate transactions flagged as fraudulent can lead to significant lost revenue, customer satisfaction, and operational expenses associated with manual review and intervention. 
+However, measuring the effectiveness of a fraud identification model is more complex than these classification metrics as not all transactions share the same misclassification costs. It is imperative that Recall of a fraud model captures high dollar fraud. However, the importance of Precision should not be underestimated, as legitimate transactions flagged as fraudulent can lead to significant lost revenue, customer satisfaction, and operational expenses associated with manual review and intervention. 
 
 An **Example Dependent Cost-Sensitive Prediction Model** is one that is measured based on the true costs of misclassification as opposed to just the frequency of these incidents. 
 
